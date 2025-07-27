@@ -64,7 +64,7 @@
         .architecture-diagram-grid {
             display: grid;
             grid-template-columns: 1fr 0.5fr 1.5fr 0.5fr 1fr;
-            grid-template-rows: auto auto auto;
+            grid-template-rows: repeat(5, auto);
             gap: 0.5rem;
             align-items: center;
         }
@@ -226,21 +226,25 @@
                 <div id="architecture-diagram" class="architecture-diagram-grid mb-4">
                      <div class="arch-item" data-desc="The React-based Single Page Application used by farmers. Optimized for mobile with TailwindCSS.">Client App (Farmer)</div>
                      <div class="arch-arrow">→</div>
-                     <div class="arch-item row-span-3" data-desc="A single, unified entry point for all client requests. Handles routing, authentication (JWT), and rate limiting.">API Gateway</div>
+                     <div class="arch-item row-span-5" data-desc="A single, unified entry point for all client requests. Handles routing, authentication (JWT), and rate limiting.">API Gateway</div>
                      <div class="arch-arrow">→</div>
                      <div class="arch-item" data-desc="Manages user registration, login, profiles, and JWT generation.">Auth Service</div>
                      
-                     <div></div>
-                     <div></div>
-                     <div></div>
+                     <div></div><div></div><div></div>
+                     <div class="arch-arrow">→</div>
+                     <div class="arch-item" data-desc="Central repository for curated data like crop schedules, fertilizer guides, and scheme info.">Agri-Data Service</div>
+
+                     <div></div><div></div><div></div>
                      <div class="arch-arrow">→</div>
                      <div class="arch-item" data-desc="Handles real-time data like weather from OpenWeatherMap and mandi prices from Agmarknet.">Market & Weather Service</div>
 
-                     <div></div>
-                     <div></div>
-                     <div></div>
+                     <div></div><div></div><div></div>
                      <div class="arch-arrow">→</div>
                      <div class="arch-item" data-desc="Powers the Discussion Forum and Grievance system using real-time databases like Firestore.">Community Service</div>
+
+                     <div></div><div></div><div></div>
+                     <div class="arch-arrow">→</div>
+                     <div class="arch-item" data-desc="Manages SMS/WhatsApp alerts via a CPaaS provider, triggered by events from other services.">Notification Service</div>
                 </div>
                  <p id="arch-desc" class="text-center text-gray-600 italic min-h-[2rem]">Hover over a component to see its description.</p>
             </div>
@@ -250,7 +254,6 @@
 
     <!-- Modals -->
     <div id="modal-container">
-        <!-- Crop Schedule Modal -->
         <div id="modal-crop-schedule" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center p-4">
             <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                 <div class="p-6 border-b sticky top-0 bg-white">
@@ -259,17 +262,19 @@
                     <button class="modal-close absolute top-4 right-4 text-gray-500 hover:text-gray-800">&times;</button>
                 </div>
                 <div class="p-6">
-                    <h4 class="font-bold text-lg mb-2">Implementation Details</h4>
-                    <ul class="list-disc list-inside space-y-2 text-gray-700">
-                        <li><strong>Frontend:</strong> Dropdowns for crop and state selection. The output is a visual timeline component showing the crop lifecycle stages (e.g., land prep, sowing, harvesting) month by month.</li>
-                        <li><strong>Backend:</strong> The Agri-Data Service serves a static, curated dataset. This data is manually extracted and structured from authoritative PDF documents from sources like ICAR and KVKs into a proprietary JSON format.</li>
-                        <li><strong>Advantage:</strong> This curated database is a key asset, providing structured, accessible data that is not available via any public API, thus creating a strong competitive advantage.</li>
+                    <h4 class="font-bold text-lg mb-2">Data Sourcing & ETL Process</h4>
+                    <p class="text-gray-700 mb-4">Data is sourced from "Package of Practices" (PoP) documents from ICAR, KVKs, and State Agricultural Universities. As these are PDFs, a manual ETL (Extract, Transform, Load) process is necessary:</p>
+                    <ul class="list-decimal list-inside space-y-2 text-gray-700">
+                        <li><strong>Extract:</strong> Manually transcribe data and use tools like Tabula to extract tables from PDFs.</li>
+                        <li><strong>Transform:</strong> Convert unstructured data into a standardized JSON format, mapping various terminologies to a unified schema.</li>
+                        <li><strong>Load:</strong> The structured JSON is loaded into a `crop_schedules` collection in the `Agri-Data Service`'s MongoDB.</li>
                     </ul>
+                    <h4 class="font-bold text-lg mt-4 mb-2">Value Proposition</h4>
+                    <p class="text-gray-700">This curated database is a unique proprietary asset, providing structured data not available via any public API and forming a strong competitive advantage.</p>
                 </div>
             </div>
         </div>
         
-        <!-- Fertilizer Guide Modal -->
         <div id="modal-fertilizer-guide" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center p-4">
             <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                 <div class="p-6 border-b sticky top-0 bg-white">
@@ -280,15 +285,15 @@
                 <div class="p-6">
                     <h4 class="font-bold text-lg mb-2">Implementation Details</h4>
                     <ul class="list-disc list-inside space-y-2 text-gray-700">
+                        <li><strong>Data Sourcing:</strong> Recommendations are curated from specialized documents from institutions like Tamil Nadu Agricultural University (TNAU) and ICAR advisories.</li>
+                        <li><strong>Database:</strong> Data is stored in a `fertilizer_recommendations` collection in MongoDB within the `Agri-Data Service`.</li>
                         <li><strong>Frontend:</strong> Displays information in clear, digestible category cards for each crop, detailing NPK ratios, application timings, and organic alternatives.</li>
-                        <li><strong>Backend:</strong> Similar to the crop schedule, this relies on a structured data file with crop-specific recommendations, curated from agricultural university documents and stored in the Agri-Data Service.</li>
-                        <li><strong>Admin Panel:</strong> An admin interface allows non-technical staff to update these recommendations as new research becomes available.</li>
+                        <li><strong>Admin Panel:</strong> An admin interface allows non-technical staff to update these recommendations as new research becomes available, ensuring data remains current.</li>
                     </ul>
                 </div>
             </div>
         </div>
 
-        <!-- Weather Forecast Modal -->
         <div id="modal-weather-forecast" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center p-4">
             <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                 <div class="p-6 border-b sticky top-0 bg-white">
@@ -297,17 +302,17 @@
                     <button class="modal-close absolute top-4 right-4 text-gray-500 hover:text-gray-800">&times;</button>
                 </div>
                 <div class="p-6">
-                    <h4 class="font-bold text-lg mb-2">Implementation Details</h4>
+                    <h4 class="font-bold text-lg mb-2">API & Backend Implementation</h4>
                      <ul class="list-disc list-inside space-y-2 text-gray-700">
-                        <li><strong>API:</strong> Uses the OpenWeatherMap API for its reliability and comprehensive data, including 7-day forecasts and rainfall alerts.</li>
-                        <li><strong>Backend:</strong> The Market & Weather Service fetches data from the API using the user's lat-long. It includes a robust caching layer (e.g., Redis) to reduce API calls, manage costs, and improve response times.</li>
-                        <li><strong>Frontend:</strong> A dedicated weather widget component fetches data from our backend (not directly from OpenWeatherMap, to protect the API key) and displays the forecast in a clear, graphical format.</li>
+                        <li><strong>API Choice:</strong> Uses the OpenWeatherMap API for its reliability and comprehensive data.</li>
+                        <li><strong>Backend Logic:</strong> The `Market & Weather Service` makes a server-to-server call to the API. This protects the API key, which should never be exposed on the client-side.</li>
+                        <li><strong>Caching Strategy:</strong> The response from OpenWeatherMap for a given location is cached in Redis with a TTL of 1-2 hours. This reduces API calls, manages costs, and dramatically improves response times for users.</li>
+                        <li><strong>Frontend:</strong> A dedicated weather widget component fetches data from our secure backend endpoint and displays the forecast graphically.</li>
                     </ul>
                 </div>
             </div>
         </div>
 
-        <!-- AI Disease Detector Modal -->
         <div id="modal-disease-detector" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center p-4">
             <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                 <div class="p-6 border-b sticky top-0 bg-white">
@@ -321,7 +326,7 @@
                     <div class="space-y-4">
                         <div class="p-4 border rounded-lg hover:bg-gray-50">
                             <h5 class="font-semibold text-md">Phase 1: MVP with Teachable Machine</h5>
-                            <p class="text-sm text-gray-700">Rapidly deploy a proof-of-concept using a TensorFlow.js model created with Google's Teachable Machine. The model runs entirely on the user's device, minimizing server costs and validating the user flow.</p>
+                            <p class="text-sm text-gray-700">Rapidly deploy a proof-of-concept using a TensorFlow.js model created with Google's Teachable Machine. The model runs entirely on the user's device (client-side inference), minimizing server costs and validating the user flow.</p>
                         </div>
                         <div class="text-center text-2xl text-gray-400">↓</div>
                         <div class="p-4 border rounded-lg hover:bg-gray-50">
@@ -333,7 +338,6 @@
             </div>
         </div>
 
-        <!-- Soil Health Modal -->
         <div id="modal-soil-health" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center p-4">
             <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                 <div class="p-6 border-b sticky top-0 bg-white">
@@ -344,16 +348,15 @@
                 <div class="p-6">
                     <h4 class="font-bold text-lg mb-2">Implementation Details</h4>
                      <ul class="list-disc list-inside space-y-2 text-gray-700">
-                        <li><strong>Frontend:</strong> A simple form allows users to input values from their Soil Health Card (pH, N, P, K, etc.).</li>
-                        <li><strong>Backend Logic:</strong> The Agri-Data Service contains a `crop_soil_profiles` collection with optimal parameter ranges for various crops. The system compares user inputs to these ranges.</li>
+                        <li><strong>Problem Solved:</strong> Interprets the raw data from the government's Soil Health Card (SHC) scheme, a "last-mile" translation layer that government portals lack.</li>
+                        <li><strong>Frontend:</strong> A simple form allows users to input values from their SHC (pH, N, P, K, etc.).</li>
+                        <li><strong>Backend Logic:</strong> The `Agri-Data Service` contains a `crop_soil_profiles` collection with optimal parameter ranges for various crops. The system compares user inputs to these ranges.</li>
                         <li><strong>Output:</strong> Generates a clear, color-coded report showing deficiencies ("Low," "Optimal," "High") and provides a tailored fertilizer plan by adjusting base recommendations to fix the specific soil issues.</li>
-                        <li><strong>Value Proposition:</strong> Acts as the crucial "last-mile" translation layer that government portals lack, turning raw data into actionable advice.</li>
                     </ul>
                 </div>
             </div>
         </div>
 
-        <!-- Mandi Viewer Modal -->
         <div id="modal-mandi-viewer" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center p-4">
             <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                 <div class="p-6 border-b sticky top-0 bg-white">
@@ -362,8 +365,12 @@
                     <button class="modal-close absolute top-4 right-4 text-gray-500 hover:text-gray-800">&times;</button>
                 </div>
                 <div class="p-6">
-                    <h4 class="font-bold text-lg mb-2">Data Sourcing & Visualization</h4>
-                    <p class="text-gray-700 mb-4">Since Agmarknet lacks a stable public API, a resilient dual-pronged strategy is used: first, attempt to use the data.gov.in API, and if it fails, fall back to a web scraper (Puppeteer + Cheerio) run by a daily cron job.</p>
+                    <h4 class="font-bold text-lg mb-2">Resilient Data Sourcing Strategy</h4>
+                    <p class="text-gray-700 mb-4">Since Agmarknet lacks a stable public API, a dual-pronged strategy ensures reliability:</p>
+                     <ul class="list-disc list-inside space-y-2 text-gray-700 mb-4">
+                        <li><strong>Primary Method:</strong> Attempt to fetch data from the `data.gov.in` API.</li>
+                        <li><strong>Fallback Method:</strong> If the API fails or returns stale data, a daily cron job triggers a web scraper built with **Puppeteer** (to control a headless browser and handle dynamic content) and **Cheerio** (to parse the resulting HTML).</li>
+                    </ul>
                     <div class="mb-4">
                         <label for="commodity-filter" class="block text-sm font-medium text-gray-700">Filter by Commodity:</label>
                         <select id="commodity-filter" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
@@ -379,7 +386,6 @@
             </div>
         </div>
 
-        <!-- Seller Directory Modal -->
         <div id="modal-seller-directory" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center p-4">
             <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                 <div class="p-6 border-b sticky top-0 bg-white">
@@ -388,17 +394,17 @@
                     <button class="modal-close absolute top-4 right-4 text-gray-500 hover:text-gray-800">&times;</button>
                 </div>
                 <div class="p-6">
-                    <h4 class="font-bold text-lg mb-2">Implementation Details</h4>
+                    <h4 class="font-bold text-lg mb-2">Geospatial Search Implementation</h4>
                      <ul class="list-disc list-inside space-y-2 text-gray-700">
-                        <li><strong>Database:</strong> Seller information (name, type, contact, location) is stored in a MongoDB collection.</li>
-                        <li><strong>Geospatial Indexing:</strong> A critical `2dsphere` index is used on the location field. This allows for highly efficient geospatial queries, such as "find all fertilizer suppliers within 15km."</li>
-                        <li><strong>Frontend:</strong> A searchable list interface with filters for seller type, state, and district. An optional map view can be integrated using the Google Maps API.</li>
+                        <li><strong>Database:</strong> Seller information is stored in a MongoDB collection in the `Agri-Data Service`.</li>
+                        <li><strong>Geospatial Indexing:</strong> A critical **`2dsphere` index** is used on the location field. This specialized index allows for highly efficient geospatial queries.</li>
+                        <li><strong>Backend Query:</strong> The backend API can efficiently execute queries like "find all fertilizer suppliers within 15km" using MongoDB's `$nearSphere` operator, ensuring fast, relevant, location-aware search results.</li>
+                        <li><strong>Frontend:</strong> A searchable list interface with filters for seller type, state, and district.</li>
                     </ul>
                 </div>
             </div>
         </div>
 
-        <!-- Discussion Forum Modal -->
         <div id="modal-discussion-forum" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center p-4">
             <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                 <div class="p-6 border-b sticky top-0 bg-white">
@@ -407,17 +413,16 @@
                     <button class="modal-close absolute top-4 right-4 text-gray-500 hover:text-gray-800">&times;</button>
                 </div>
                 <div class="p-6">
-                    <h4 class="font-bold text-lg mb-2">Technology Choice & Implementation</h4>
+                    <h4 class="font-bold text-lg mb-2">Real-time Technology Choice</h4>
                      <ul class="list-disc list-inside space-y-2 text-gray-700">
-                        <li><strong>Database:</strong> Firebase Firestore is the optimal choice. Its real-time `onSnapshot` listeners automatically push live updates to all clients, which is perfect for a chat-like forum.</li>
-                        <li><strong>Data Model:</strong> A `forums` collection holds post documents. Each post document can have a `replies` subcollection, which is an efficient way to structure threaded conversations.</li>
+                        <li><strong>Database:</strong> **Firebase Firestore** is the optimal choice. Its real-time `onSnapshot` listeners automatically push live updates to all clients, which is perfect for a chat-like forum and far simpler than a custom WebSocket solution.</li>
+                        <li><strong>Data Model:</strong> A `forums` collection holds post documents. Each post can have a `replies` subcollection, an efficient way to structure threaded conversations.</li>
                         <li><strong>Frontend:</strong> A Reddit-style UI with posts and comments. The `react-firebase-hooks` library simplifies subscribing to real-time data, ensuring the UI automatically re-renders when new posts or replies are added.</li>
                     </ul>
                 </div>
             </div>
         </div>
         
-        <!-- Other Modals: Support & Growth -->
         <div id="modal-schemes-browser" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center p-4">
             <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                 <div class="p-6 border-b sticky top-0 bg-white">
@@ -426,11 +431,11 @@
                     <button class="modal-close absolute top-4 right-4 text-gray-500 hover:text-gray-800">&times;</button>
                 </div>
                 <div class="p-6">
-                    <h4 class="font-bold text-lg mb-2">Implementation Details</h4>
+                    <h4 class="font-bold text-lg mb-2">Manual Curation Process</h4>
                     <ul class="list-disc list-inside space-y-2 text-gray-700">
-                        <li><strong>Data Sourcing:</strong> There is no central government API. This feature relies on a manual curation process. A content team researches and enters scheme details into the database via the admin panel.</li>
-                        <li><strong>Database:</strong> A `schemes` collection in MongoDB stores details like name, eligibility, benefits, and application links, with tags for state and type.</li>
-                        <li><strong>Frontend:</strong> A simple, filterable list UI allows users to easily find schemes relevant to their location and needs.</li>
+                        <li><strong>Constraint:</strong> There is no central, machine-readable government API for agricultural schemes. Official portals are for human consumption only.</li>
+                        <li><strong>Implementation:</strong> The feature relies on a manual curation process. A content team researches schemes and enters details (eligibility, benefits, links) into a `schemes` collection in MongoDB via the Admin Panel.</li>
+                        <li><strong>Frontend:</strong> A simple, filterable list UI allows users to easily find schemes relevant to their location and needs from our curated database.</li>
                     </ul>
                 </div>
             </div>
@@ -443,10 +448,10 @@
                     <button class="modal-close absolute top-4 right-4 text-gray-500 hover:text-gray-800">&times;</button>
                 </div>
                 <div class="p-6">
-                    <h4 class="font-bold text-lg mb-2">Implementation Details</h4>
+                    <h4 class="font-bold text-lg mb-2">Low-Maintenance Content Pipeline</h4>
                     <ul class="list-disc list-inside space-y-2 text-gray-700">
-                        <li><strong>Video Content:</strong> The backend integrates with the YouTube Data API. Admins curate trusted playlists (from ICAR, KVKs). A scheduled job fetches video metadata, which is cached in our database for fast loading. This keeps content fresh automatically.</li>
-                        <li><strong>Article Content:</strong> Text-based articles and tips are managed via the admin panel and stored in a separate MongoDB collection with tags for filtering.</li>
+                        <li><strong>Video Content:</strong> The backend integrates with the **YouTube Data API**. Admins curate trusted playlists (from ICAR, KVKs). A scheduled job fetches video metadata, which is cached in our database. This keeps content fresh automatically without app updates.</li>
+                        <li><strong>Article Content:</strong> Text-based articles are managed via the admin panel and stored in a separate MongoDB collection with tags for filtering.</li>
                         <li><strong>Languages:</strong> The platform is designed to support multiple languages like Hinglish, Hindi, and Marathi to maximize accessibility.</li>
                     </ul>
                 </div>
@@ -460,12 +465,11 @@
                     <button class="modal-close absolute top-4 right-4 text-gray-500 hover:text-gray-800">&times;</button>
                 </div>
                 <div class="p-6">
-                    <h4 class="font-bold text-lg mb-2">Implementation Details</h4>
+                    <h4 class="font-bold text-lg mb-2">Personalization Hub</h4>
                     <ul class="list-disc list-inside space-y-2 text-gray-700">
-                        <li><strong>Authentication:</strong> A self-managed system using JSON Web Tokens (JWT) is chosen for flexibility and seamless integration with the microservices architecture.</li>
+                        <li><strong>Authentication:</strong> A self-managed system using **JSON Web Tokens (JWT)** is chosen for flexibility and seamless integration with the microservices architecture.</li>
                         <li><strong>Profile Database:</strong> The `Auth Service` manages a `users` collection in MongoDB. The schema stores name, phone, language, location (with geo-coordinates), and notification preferences.</li>
-                        <li><strong>Crop History:</strong> An array within the user document stores a history of crops grown. This data is crucial for providing proactive, personalized alerts and recommendations in the future.</li>
-                        <li><strong>Frontend:</strong> A profile dashboard allows users to view and edit their information and see their crop history.</li>
+                        <li><strong>Crop History:</strong> An array within the user document stores a history of crops grown. This data is crucial for providing proactive, personalized alerts and recommendations.</li>
                     </ul>
                 </div>
             </div>
@@ -478,11 +482,11 @@
                     <button class="modal-close absolute top-4 right-4 text-gray-500 hover:text-gray-800">&times;</button>
                 </div>
                 <div class="p-6">
-                    <h4 class="font-bold text-lg mb-2">Implementation Details</h4>
+                    <h4 class="font-bold text-lg mb-2">Scalable Implementation Flow</h4>
                     <ul class="list-disc list-inside space-y-2 text-gray-700">
                         <li><strong>API:</strong> Integrates the Google Maps JavaScript API for the frontend map interface.</li>
-                        <li><strong>Data Flow:</strong> The frontend does NOT load all locations. It sends the user's coordinates to our backend. The backend uses a highly efficient geospatial query (`$nearSphere`) on the indexed MongoDB collection to find only nearby service centers.</li>
-                        <li><strong>Performance:</strong> This architecture is highly scalable and performant. By offloading the complex query to the database, only a small, relevant subset of data is sent to the client, ensuring the map loads quickly even on slow networks.</li>
+                        <li><strong>Data Flow:</strong> The frontend sends the user's coordinates to our backend. The backend uses a highly efficient geospatial query (`$nearSphere`) on the indexed MongoDB collection to find only nearby service centers.</li>
+                        <li><strong>Performance:</strong> This architecture is highly scalable. By offloading the complex query to the database, only a small, relevant subset of data is sent to the client, ensuring the map loads quickly even on slow networks. This avoids the inefficient approach of sending all locations to the client.</li>
                     </ul>
                 </div>
             </div>
@@ -495,10 +499,10 @@
                     <button class="modal-close absolute top-4 right-4 text-gray-500 hover:text-gray-800">&times;</button>
                 </div>
                 <div class="p-6">
-                    <h4 class="font-bold text-lg mb-2">Implementation Details</h4>
+                    <h4 class="font-bold text-lg mb-2">Event-Driven Architecture</h4>
                     <ul class="list-disc list-inside space-y-2 text-gray-700">
-                        <li><strong>CPaaS Provider:</strong> A Communications Platform as a Service (e.g., Twilio, Gupshup, MSG91) is used to handle the delivery of messages. The choice depends on a trade-off between cost, features, and developer experience.</li>
-                        <li><strong>Architecture:</strong> The `Notification Service` is event-driven. It listens for events from other services (e.g., `MandiPricesUpdated`, `NewSchemeAvailable`).</li>
+                        <li><strong>CPaaS Provider:</strong> Uses a Communications Platform as a Service (e.g., Twilio, Gupshup, MSG91) to handle message delivery.</li>
+                        <li><strong>Architecture:</strong> The `Notification Service` is event-driven. It listens for events from other services (e.g., `MandiPricesUpdated`, `NewSchemeAvailable`) via a message queue like RabbitMQ.</li>
                         <li><strong>User Control:</strong> An opt-in UI in the user's profile allows them to choose which alerts they want to receive and on which channel (SMS or WhatsApp).</li>
                     </ul>
                 </div>
@@ -512,10 +516,10 @@
                     <button class="modal-close absolute top-4 right-4 text-gray-500 hover:text-gray-800">&times;</button>
                 </div>
                 <div class="p-6">
-                    <h4 class="font-bold text-lg mb-2">Implementation Details</h4>
+                    <h4 class="font-bold text-lg mb-2">Transparent Feedback Loop</h4>
                     <ul class="list-disc list-inside space-y-2 text-gray-700">
                         <li><strong>Frontend:</strong> A simple form to submit issue type, description, and an optional image.</li>
-                        <li><strong>Backend:</strong> The `Community Service` receives the submission. Images are uploaded to cloud storage (e.g., S3), and the grievance details are stored in a MongoDB collection.</li>
+                        <li><strong>Backend:</strong> The `Community Service` receives the submission. Images are uploaded to cloud storage (e.g., AWS S3), and the grievance details are stored in a MongoDB collection.</li>
                         <li><strong>Admin Panel:</strong> A dashboard for admins to view, assign, and update the status of grievances.</li>
                         <li><strong>User Tracking:</strong> Users can track the status of their submitted grievances from their profile page, ensuring a transparent feedback loop.</li>
                     </ul>
@@ -694,7 +698,11 @@
             };
             
             document.querySelector('[data-modal-target="modal-mandi-viewer"]').addEventListener('click', () => {
-                 setTimeout(() => renderMandiChart(commodityFilter.value), 100);
+                 setTimeout(() => {
+                    if (document.getElementById('mandiPriceChart')) {
+                        renderMandiChart(commodityFilter.value)
+                    }
+                 }, 100);
             });
             
             commodityFilter.addEventListener('change', (e) => {

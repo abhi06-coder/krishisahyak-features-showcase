@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Krishi Sahayak - Interactive Feature Showcase</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Earth & Sky -->
+    <!-- Application Structure Plan: The application is structured into four thematic sections: 'Farm Intelligence', 'Market & Community', 'Support & Growth', and 'Platform Architecture'. This task-oriented grouping, rather than a linear list of features, allows a user (e.g., a product manager, investor, or developer) to explore the platform's capabilities based on their area of interest. 'Farm Intelligence' covers core agricultural decision-making tools. 'Market & Community' focuses on economic and social connectivity. 'Support & Growth' details user empowerment features. 'Platform Architecture' provides a technical overview for developers or stakeholders. Navigation is handled by a sticky header, allowing seamless movement between these logical sections within the single-page application, facilitating a clear and comprehensive understanding of the product's value proposition. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Core Features -> Goal: Organize & Inform -> Viz/Presentation: Interactive Cards with detailed modals. Interaction: Click to reveal full implementation details. Justification: Provides a high-level overview while allowing deep dives into specific features without cluttering the main view. Method: HTML/CSS/JS.
+        - Report Info: User Profile & Crop History -> Goal: Inform -> Viz/Presentation: Structured text in a card format. Interaction: None. Justification: Clearly presents the data schema concept. Method: HTML/CSS.
+        - Report Info: APMC Mandi Prices -> Goal: Compare -> Viz/Presentation: Interactive Bar Chart. Interaction: Filter by commodity. Justification: Visually demonstrates the price comparison capability for farmers. Library/Method: Chart.js.
+        - Report Info: AI Disease Detector -> Goal: Organize/Flow -> Viz/Presentation: A multi-step process diagram. Interaction: Hover to highlight steps. Justification: Clearly communicates the phased implementation strategy (MVP to Scalable API). Method: HTML/CSS/Tailwind.
+        - Report Info: System Architecture -> Goal: Organize/Relationships -> Viz/Presentation: Diagram built with HTML/CSS grid. Interaction: Hover over components to see descriptions. Justification: Effectively visualizes the microservices architecture and data flow without using SVG, making it accessible and maintainable. Method: HTML/CSS/Tailwind.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F9F9F9;
+            color: #333;
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link.active, .nav-link:hover {
+            color: #22C55E; /* green-500 */
+            border-bottom-color: #22C55E;
+        }
+        .feature-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .modal {
+            display: none;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .modal.open {
+            display: flex;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .architecture-diagram-grid {
+            display: grid;
+            grid-template-columns: 1fr 0.5fr 1.5fr 0.5fr 1fr;
+            grid-template-rows: repeat(5, auto);
+            gap: 0.5rem;
+            align-items: center;
+        }
+        .arch-item {
+            border: 1px solid #D1D5DB;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            font-size: 0.875rem;
+            background-color: white;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .arch-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #6B7280;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <!-- Header & Navigation -->
+    <header class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-40">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <span class="text-2xl font-bold text-green-600">कृषि सहायक</span>
+                    <span class="ml-2 text-gray-500 text-sm hidden sm:inline">(Feature Showcase)</span>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#farm-intelligence" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700">Farm Intelligence</a>
+                        <a href="#market-community" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700">Market & Community</a>
+                        <a href="#support-growth" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700">Support & Growth</a>
+                        <a href="#architecture" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700">Architecture</a>
+                    </div>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-green-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-green-500">
+                        <span class="sr-only">Open main menu</span>
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="md:hidden hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#farm-intelligence" class="block nav-link px-3 py-2 rounded-md text-base font-medium text-gray-700">Farm Intelligence</a>
+                <a href="#market-community" class="block nav-link px-3 py-2 rounded-md text-base font-medium text-gray-700">Market & Community</a>
+                <a href="#support-growth" class="block nav-link px-3 py-2 rounded-md text-base font-medium text-gray-700">Support & Growth</a>
+                <a href="#architecture" class="block nav-link px-3 py-2 rounded-md text-base font-medium text-gray-700">Architecture</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Hero Section -->
+        <section class="text-center mb-16">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-800 mb-4">Empowering Farmers with Technology</h1>
+            <p class="max-w-3xl mx-auto text-lg text-gray-600">An interactive exploration of the Krishi Sahayak platform. This showcase translates the technical documentation into a tangible overview of the app's features, demonstrating how each component solves critical problems for farmers across India.</p>
+        </section>
+
+        <!-- Farm Intelligence Section -->
+        <section id="farm-intelligence" class="mb-16 scroll-mt-16">
+            <h2 class="text-3xl font-bold text-gray-800 mb-2">Farm Intelligence</h2>
+            <p class="text-gray-600 mb-8">This section covers the core data-driven modules that provide farmers with actionable advice for crop management and health, turning complex agricultural science into easy-to-understand guidance.</p>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Feature Cards for Farm Intelligence -->
+                <div class="feature-card bg-white p-6 rounded-lg shadow-sm cursor-pointer" data-modal-target="modal-crop-schedule">
+                    <h3 class="font-bold text-xl mb-2 text-green-700">Crop Schedule Planner</h3>
+                    <p class="text-gray-600">Provides timely sowing, irrigation, and harvesting guidance based on regional data to boost yield.</p>
+                </div>
+                <div class="feature-card bg-white p-6 rounded-lg shadow-sm cursor-pointer" data-modal-target="modal-fertilizer-guide">
+                    <h3 class="font-bold text-xl mb-2 text-green-700">Fertilizer Usage Guide</h3>
+                    <p class="text-gray-600">Offers crop-specific NPK and organic recommendations to ensure healthier crops and lower costs.</p>
+                </div>
+                <div class="feature-card bg-white p-6 rounded-lg shadow-sm cursor-pointer" data-modal-target="modal-weather-forecast">
+                    <h3 class="font-bold text-xl mb-2 text-green-700">Real-time Weather Forecast</h3>
+                    <p class="text-gray-600">A 7-day forecast to help farmers plan irrigation and pesticide use intelligently.</p>
+                </div>
+                <div class="feature-card bg-white p-6 rounded-lg shadow-sm cursor-pointer" data-modal-target="modal-disease-detector">
+                    <h3 class="font-bold text-xl mb-2 text-green-700">AI Crop Disease Detector</h3>
+                    <p class="text-gray-600">Enables early diagnosis of plant diseases through image uploads for timely treatment.</p>
+                </div>
+                <div class="feature-card bg-white p-6 rounded-lg shadow-sm cursor-pointer" data-modal-target="modal-soil-health">
+                    <h3 class="font-bold text-xl mb-2 text-green-700">Soil Health Advisor</h3>
+                    <p class="text-gray-600">Interprets soil reports and provides recommendations for crops and fertilizer plans.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Market & Community Section -->
+        <section id="market-community" class="mb-16 scroll-mt-16">
+            <h2 class="text-3xl font-bold text-gray-800 mb-2">Market & Community</h2>
+            <p class="text-gray-600 mb-8">These features connect farmers to markets and to each other, fostering economic opportunity and a supportive peer network. This is where farmers can find the best prices and share local solutions.</p>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Feature Cards for Market & Community -->
+                <div class="feature-card bg-white p-6 rounded-lg shadow-sm cursor-pointer" data-modal-target="modal-mandi-viewer">
+                    <h3 class="font-bold text-xl mb-2 text-blue-700">APMC Mandi Price Viewer</h3>
+                    <p class="text-gray-600">Daily updated mandi prices to help farmers decide the right market and time to sell produce.</p>
+                </div>
+                <div class="feature-card bg-white p-6 rounded-lg shadow-sm cursor-pointer" data-modal-target="modal-seller-directory">
+                    <h3 class="font-bold text-xl mb-2 text-blue-700">Seller/Nursery Directory</h3>
+                    <p class="text-gray-600">A searchable directory of local suppliers for seeds, fertilizers, and other agri-products.</p>
+                </div>
+                <div class="feature-card bg-white p-6 rounded-lg shadow-sm cursor-pointer" data-modal-target="modal-discussion-forum">
+                    <h3 class="font-bold text-xl mb-2 text-blue-700">Farmer Discussion Forum</h3>
+                    <p class="text-gray-600">A digital platform for peer support, knowledge sharing, and local solution discovery.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Support & Growth Section -->
+        <section id="support-growth" class="mb-16 scroll-mt-16">
+            <h2 class="text-3xl font-bold text-gray-800 mb-2">Support & Growth</h2>
+            <p class="text-gray-600 mb-8">This group of features is designed to empower farmers by providing access to government support, learning resources, and personalized tools for long-term growth and efficiency.</p>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="feature-card bg-white p-6 rounded-lg shadow-sm cursor-pointer" data-modal-target="modal-schemes-browser">
+                    <h3 class="font-bold text-xl mb-2 text-yellow-700">Govt. Schemes Browser</h3>
+                    <p class="text-gray-600">Consolidates information on beneficial subsidies and support schemes, with application links.</p>
+                </div>
+                <div class="feature-card bg-white p-6 rounded-lg shadow-sm cursor-pointer" data-modal-target="modal-learning-hub">
+                    <h3 class="font-bold text-xl mb-2 text-yellow-700">Learning Hub</h3>
+                    <p class="text-gray-600">A collection of articles and videos in regional languages for self-learning and modern practices.</p>
+                </div>
+                <div class="feature-card bg-white p-6 rounded-lg shadow-sm cursor-pointer" data-modal-target="modal-user-profile">
+                    <h3 class="font-bold text-xl mb-2 text-yellow-700">User Profile & Crop History</h3>
+                    <p class="text-gray-600">A personalized dashboard for managing crops, location, and preferences for tailored alerts.</p>
+                </div>
+                 <div class="feature-card bg-white p-6 rounded-lg shadow-sm cursor-pointer" data-modal-target="modal-services-map">
+                    <h3 class="font-bold text-xl mb-2 text-yellow-700">Krishi Services Map</h3>
+                    <p class="text-gray-600">A map-based view to locate nearby soil labs, seed centers, and other agri-services.</p>
+                </div>
+                <div class="feature-card bg-white p-6 rounded-lg shadow-sm cursor-pointer" data-modal-target="modal-sms-alerts">
+                    <h3 class="font-bold text-xl mb-2 text-yellow-700">SMS/WhatsApp Alerts</h3>
+                    <p class="text-gray-600">Push notifications for key info like mandi prices, weather alerts, and scheme deadlines.</p>
+                </div>
+                 <div class="feature-card bg-white p-6 rounded-lg shadow-sm cursor-pointer" data-modal-target="modal-grievance-reporting">
+                    <h3 class="font-bold text-xl mb-2 text-yellow-700">Grievance Reporting</h3>
+                    <p class="text-gray-600">A system for users to report issues, track status, and ensure platform transparency.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Architecture Section -->
+        <section id="architecture" class="mb-16 scroll-mt-16">
+            <h2 class="text-3xl font-bold text-gray-800 mb-2">Platform Architecture</h2>
+            <p class="text-gray-600 mb-8">A high-level overview of the technical architecture, showcasing the microservices-based approach that ensures scalability, resilience, and independent development of features.</p>
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="font-bold text-xl mb-4 text-center">Microservices Architecture Overview</h3>
+                <div id="architecture-diagram" class="architecture-diagram-grid mb-4">
+                     <div class="arch-item" data-desc="The React-based Single Page Application used by farmers. Optimized for mobile with TailwindCSS.">Client App (Farmer)</div>
+                     <div class="arch-arrow">→</div>
+                     <div class="arch-item row-span-5" data-desc="A single, unified entry point for all client requests. Handles routing, authentication (JWT), and rate limiting.">API Gateway</div>
+                     <div class="arch-arrow">→</div>
+                     <div class="arch-item" data-desc="Manages user registration, login, profiles, and JWT generation.">Auth Service</div>
+                     
+                     <div></div><div></div><div></div>
+                     <div class="arch-arrow">→</div>
+                     <div class="arch-item" data-desc="Central repository for curated data like crop schedules, fertilizer guides, and scheme info.">Agri-Data Service</div>
+
+                     <div></div><div></div><div></div>
+                     <div class="arch-arrow">→</div>
+                     <div class="arch-item" data-desc="Handles real-time data like weather from OpenWeatherMap and mandi prices from Agmarknet.">Market & Weather Service</div>
+
+                     <div></div><div></div><div></div>
+                     <div class="arch-arrow">→</div>
+                     <div class="arch-item" data-desc="Powers the Discussion Forum and Grievance system using real-time databases like Firestore.">Community Service</div>
+
+                     <div></div><div></div><div></div>
+                     <div class="arch-arrow">→</div>
+                     <div class="arch-item" data-desc="Manages SMS/WhatsApp alerts via a CPaaS provider, triggered by events from other services.">Notification Service</div>
+                </div>
+                 <p id="arch-desc" class="text-center text-gray-600 italic min-h-[2rem]">Hover over a component to see its description.</p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modals -->
+    <div id="modal-container">
+        <div id="modal-crop-schedule" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                <div class="p-6 border-b sticky top-0 bg-white">
+                    <h3 class="text-2xl font-bold text-green-700">Crop Schedule Planner</h3>
+                    <p class="text-gray-600">Solves the problem of farmers not knowing the correct crop lifecycle for their region.</p>
+                    <button class="modal-close absolute top-4 right-4 text-gray-500 hover:text-gray-800">&times;</button>
+                </div>
+                <div class="p-6">
+                    <h4 class="font-bold text-lg mb-2">Data Sourcing & ETL Process</h4>
+                    <p class="text-gray-700 mb-4">Data is sourced from "Package of Practices" (PoP) documents from ICAR, KVKs, and State Agricultural Universities. As these are PDFs, a manual ETL (Extract, Transform, Load) process is necessary:</p>
+                    <ul class="list-decimal list-inside space-y-2 text-gray-700">
+                        <li><strong>Extract:</strong> Manually transcribe data and use tools like Tabula to extract tables from PDFs.</li>
+                        <li><strong>Transform:</strong> Convert unstructured data into a standardized JSON format, mapping various terminologies to a unified schema.</li>
+                        <li><strong>Load:</strong> The structured JSON is loaded into a `crop_schedules` collection in the `Agri-Data Service`'s MongoDB.</li>
+                    </ul>
+                    <h4 class="font-bold text-lg mt-4 mb-2">Value Proposition</h4>
+                    <p class="text-gray-700">This curated database is a unique proprietary asset, providing structured data not available via any public API and forming a strong competitive advantage.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div id="modal-fertilizer-guide" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                <div class="p-6 border-b sticky top-0 bg-white">
+                    <h3 class="text-2xl font-bold text-green-700">Fertilizer Usage Guide</h3>
+                    <p class="text-gray-600">Addresses improper fertilizer dosage that harms crops and soil.</p>
+                    <button class="modal-close absolute top-4 right-4 text-gray-500 hover:text-gray-800">&times;</button>
+                </div>
+                <div class="p-6">
+                    <h4 class="font-bold text-lg mb-2">Implementation Details</h4>
+                    <ul class="list-disc list-inside space-y-2 text-gray-700">
+                        <li><strong>Data Sourcing:</strong> Recommendations are curated from specialized documents from institutions like Tamil Nadu Agricultural University (TNAU) and ICAR advisories.</li>
+                        <li><strong>Database:</strong> Data is stored in a `fertilizer_recommendations` collection in MongoDB within the `Agri-Data Service`.</li>
+                        <li><strong>Frontend:</strong> Displays information in clear, digestible category cards for each crop, detailing NPK ratios, application timings, and organic alternatives.</li>
+                        <li><strong>Admin Panel:</strong> An admin interface allows non-technical staff to update these recommendations as new research becomes available, ensuring data remains current.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div id="modal-weather-forecast" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                <div class="p-6 border-b sticky top-0 bg-white">
+                    <h3 class="text-2xl font-bold text-green-700">Real-time Weather Forecast</h3>
+                    <p class="text-gray-600">Tackles the lack of real-time awareness of changing climate conditions.</p>
+                    <button class="modal-close absolute top-4 right-4 text-gray-500 hover:text-gray-800">&times;</button>
+                </div>
+                <div class="p-6">
+                    <h4 class="font-bold text-lg mb-2">API & Backend Implementation</h4>
+                     <ul class="list-disc list-inside space-y-2 text-gray-700">
+                        <li><strong>API Choice:</strong> Uses the OpenWeatherMap API for its reliability and comprehensive data.</li>
+                        <li><strong>Backend Logic:</strong> The `Market & Weather Service` makes a server-to-server call to the API. This protects the API key, which should never be exposed on the client-side.</li>
+                        <li><strong>Caching Strategy:</strong> The response from OpenWeatherMap for a given location is cached in Redis with a TTL of 1-2 hours. This reduces API calls, manages costs, and dramatically improves response times for users.</li>
+                        <li><strong>Frontend:</strong> A dedicated weather widget component fetches data from our secure backend endpoint and displays the forecast graphically.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div id="modal-disease-detector" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                <div class="p-6 border-b sticky top-0 bg-white">
+                    <h3 class="text-2xl font-bold text-green-700">AI Crop Disease Detector</h3>
+                    <p class="text-gray-600">Aims to solve late diagnosis of plant diseases, which leads to yield loss.</p>
+                    <button class="modal-close absolute top-4 right-4 text-gray-500 hover:text-gray-800">&times;</button>
+                </div>
+                <div class="p-6">
+                    <h4 class="font-bold text-lg mb-2">Phased Implementation Strategy</h4>
+                    <p class="text-gray-600 mb-4">A pragmatic, two-phase approach is used to de-risk development and deliver value quickly.</p>
+                    <div class="space-y-4">
+                        <div class="p-4 border rounded-lg hover:bg-gray-50">
+                            <h5 class="font-semibold text-md">Phase 1: MVP with Teachable Machine</h5>
+                            <p class="text-sm text-gray-700">Rapidly deploy a proof-of-concept using a TensorFlow.js model created with Google's Teachable Machine. The model runs entirely on the user's device (client-side inference), minimizing server costs and validating the user flow.</p>
+                        </div>
+                        <div class="text-center text-2xl text-gray-400">↓</div>
+                        <div class="p-4 border rounded-lg hover:bg-gray-50">
+                            <h5 class="font-semibold text-md">Phase 2: Scalable Solution with PlantVillage API</h5>
+                            <p class="text-sm text-gray-700">Integrate with a robust, pre-trained model via a third-party API (e.g., Roboflow) that uses the industry-standard PlantVillage dataset. The backend handles the API call, providing higher accuracy and broader disease coverage.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="modal-soil-health" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                <div class="p-6 border-b sticky top-0 bg-white">
+                    <h3 class="text-2xl font-bold text-green-700">Soil Health Advisor</h3>
+                    <p class="text-gray-600">Helps farmers who can't interpret complex soil health reports.</p>
+                    <button class="modal-close absolute top-4 right-4 text-gray-500 hover:text-gray-800">&times;</button>
+                </div>
+                <div class="p-6">
+                    <h4 class="font-bold text-lg mb-2">Implementation Details</h4>
+                     <ul class="list-disc list-inside space-y-2 text-gray-700">
+                        <li><strong>Problem Solved:</strong> Interprets the raw data from the government's Soil Health Card (SHC) scheme, a "last-mile" translation layer that government portals lack.</li>
+                        <li><strong>Frontend:</strong> A simple form allows users to input values from their SHC (pH, N, P, K, etc.).</li>
+                        <li><strong>Backend Logic:</strong> The `Agri-Data Service` contains a `crop_soil_profiles` collection with optimal parameter ranges for various crops. The system compares user inputs to these ranges.</li>
+                        <li><strong>Output:</strong> Generates a clear, color-coded report showing deficiencies ("Low," "Optimal," "High") and provides a tailored fertilizer plan by adjusting base recommendations to fix the specific soil issues.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div id="modal-mandi-viewer" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                <div class="p-6 border-b sticky top-0 bg-white">
+                    <h3 class="text-2xl font-bold text-blue-700">APMC Mandi Price Viewer</h3>
+                    <p class="text-gray-600">Solves the problem of farmers lacking access to daily updated mandi prices.</p>
+                    <button class="modal-close absolute top-4 right-4 text-gray-500 hover:text-gray-800">&times;</button>
+                </div>
+                <div class="p-6">
+                    <h4 class="font-bold text-lg mb-2">Resilient Data Sourcing Strategy</h4>
+                    <p class="text-gray-700 mb-4">Since Agmarknet lacks a stable public API, a dual-pronged strategy ensures reliability:</p>
+                     <ul class="list-disc list-inside space-y-2 text-gray-700 mb-4">
+                        <li><strong>Primary Method:</strong> Attempt to fetch data from the `data.gov.in` API.</li>
+                        <li><strong>Fallback Method:</strong> If the API fails or returns stale data, a daily cron job triggers a web scraper built with **Puppeteer** (to control a headless browser and handle dynamic content) and **Cheerio** (to parse the resulting HTML).</li>
+                    </ul>
+                    <div class="mb-4">
+                        <label for="commodity-filter" class="block text-sm font-medium text-gray-700">Filter by Commodity:</label>
+                        <select id="commodity-filter" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                            <option>Wheat</option>
+                            <option>Rice</option>
+                            <option>Cotton</option>
+                        </select>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="mandiPriceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="modal-seller-directory" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                <div class="p-6 border-b sticky top-0 bg-white">
+                    <h3 class="text-2xl font-bold text-blue-700">Seller/Nursery Contact Directory</h3>
+                    <p class="text-gray-600">Addresses the difficulty in finding and contacting local agri-product suppliers.</p>
+                    <button class="modal-close absolute top-4 right-4 text-gray-500 hover:text-gray-800">&times;</button>
+                </div>
+                <div class="p-6">
+                    <h4 class="font-bold text-lg mb-2">Geospatial Search Implementation</h4>
+                     <ul class="list-disc list-inside space-y-2 text-gray-700">
+                        <li><strong>Database:</strong> Seller information is stored in a MongoDB collection in the `Agri-Data Service`.</li>
+                        <li><strong>Geospatial Indexing:</strong> A critical **`2dsphere` index** is used on the location field. This specialized index allows for highly efficient geospatial queries.</li>
+                        <li><strong>Backend Query:</strong> The backend API can efficiently execute queries like "find all fertilizer suppliers within 15km" using MongoDB's `$nearSphere` operator, ensuring fast, relevant, location-aware search results.</li>
+                        <li><strong>Frontend:</strong> A searchable list interface with filters for seller type, state, and district.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div id="modal-discussion-forum" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                <div class="p-6 border-b sticky top-0 bg-white">
+                    <h3 class="text-2xl font-bold text-blue-700">Farmer Discussion Forum</h3>
+                    <p class="text-gray-600">Creates a digital platform for farmer interaction, which is often lacking.</p>
+                    <button class="modal-close absolute top-4 right-4 text-gray-500 hover:text-gray-800">&times;</button>
+                </div>
+                <div class="p-6">
+                    <h4 class="font-bold text-lg mb-2">Real-time Technology Choice</h4>
+                     <ul class="list-disc list-inside space-y-2 text-gray-700">
+                        <li><strong>Database:</strong> **Firebase Firestore** is the optimal choice. Its real-time `onSnapshot` listeners automatically push live updates to all clients, which is perfect for a chat-like forum and far simpler than a custom WebSocket solution.</li>
+                        <li><strong>Data Model:</strong> A `forums` collection holds post documents. Each post can have a `replies` subcollection, an efficient way to structure threaded conversations.</li>
+                        <li><strong>Frontend:</strong> A Reddit-style UI with posts and comments. The `react-firebase-hooks` library simplifies subscribing to real-time data, ensuring the UI automatically re-renders when new posts or replies are added.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div id="modal-schemes-browser" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                <div class="p-6 border-b sticky top-0 bg-white">
+                    <h3 class="text-2xl font-bold text-yellow-700">Government Schemes Browser</h3>
+                    <p class="text-gray-600">Helps farmers who are unaware of existing benefits and subsidies.</p>
+                    <button class="modal-close absolute top-4 right-4 text-gray-500 hover:text-gray-800">&times;</button>
+                </div>
+                <div class="p-6">
+                    <h4 class="font-bold text-lg mb-2">Manual Curation Process</h4>
+                    <ul class="list-disc list-inside space-y-2 text-gray-700">
+                        <li><strong>Constraint:</strong> There is no central, machine-readable government API for agricultural schemes. Official portals are for human consumption only.</li>
+                        <li><strong>Implementation:</strong> The feature relies on a manual curation process. A content team researches schemes and enters details (eligibility, benefits, links) into a `schemes` collection in MongoDB via the Admin Panel.</li>
+                        <li><strong>Frontend:</strong> A simple, filterable list UI allows users to easily find schemes relevant to their location and needs from our curated database.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div id="modal-learning-hub" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                <div class="p-6 border-b sticky top-0 bg-white">
+                    <h3 class="text-2xl font-bold text-yellow-700">Learning Hub (Tips + Videos)</h3>
+                    <p class="text-gray-600">Addresses the lack of training and regional language content.</p>
+                    <button class="modal-close absolute top-4 right-4 text-gray-500 hover:text-gray-800">&times;</button>
+                </div>
+                <div class="p-6">
+                    <h4 class="font-bold text-lg mb-2">Low-Maintenance Content Pipeline</h4>
+                    <ul class="list-disc list-inside space-y-2 text-gray-700">
+                        <li><strong>Video Content:</strong> The backend integrates with the **YouTube Data API**. Admins curate trusted playlists (from ICAR, KVKs). A scheduled job fetches video metadata, which is cached in our database. This keeps content fresh automatically without app updates.</li>
+                        <li><strong>Article Content:</strong> Text-based articles are managed via the admin panel and stored in a separate MongoDB collection with tags for filtering.</li>
+                        <li><strong>Languages:</strong> The platform is designed to support multiple languages like Hinglish, Hindi, and Marathi to maximize accessibility.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div id="modal-user-profile" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                <div class="p-6 border-b sticky top-0 bg-white">
+                    <h3 class="text-2xl font-bold text-yellow-700">User Profile + Crop History</h3>
+                    <p class="text-gray-600">Solves the need for a personalized dashboard for farmers.</p>
+                    <button class="modal-close absolute top-4 right-4 text-gray-500 hover:text-gray-800">&times;</button>
+                </div>
+                <div class="p-6">
+                    <h4 class="font-bold text-lg mb-2">Personalization Hub</h4>
+                    <ul class="list-disc list-inside space-y-2 text-gray-700">
+                        <li><strong>Authentication:</strong> A self-managed system using **JSON Web Tokens (JWT)** is chosen for flexibility and seamless integration with the microservices architecture.</li>
+                        <li><strong>Profile Database:</strong> The `Auth Service` manages a `users` collection in MongoDB. The schema stores name, phone, language, location (with geo-coordinates), and notification preferences.</li>
+                        <li><strong>Crop History:</strong> An array within the user document stores a history of crops grown. This data is crucial for providing proactive, personalized alerts and recommendations.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div id="modal-services-map" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                <div class="p-6 border-b sticky top-0 bg-white">
+                    <h3 class="text-2xl font-bold text-yellow-700">Krishi Services Map</h3>
+                    <p class="text-gray-600">Helps farmers find nearby agri-service centers like soil labs.</p>
+                    <button class="modal-close absolute top-4 right-4 text-gray-500 hover:text-gray-800">&times;</button>
+                </div>
+                <div class="p-6">
+                    <h4 class="font-bold text-lg mb-2">Scalable Implementation Flow</h4>
+                    <ul class="list-disc list-inside space-y-2 text-gray-700">
+                        <li><strong>API:</strong> Integrates the Google Maps JavaScript API for the frontend map interface.</li>
+                        <li><strong>Data Flow:</strong> The frontend sends the user's coordinates to our backend. The backend uses a highly efficient geospatial query (`$nearSphere`) on the indexed MongoDB collection to find only nearby service centers.</li>
+                        <li><strong>Performance:</strong> This architecture is highly scalable. By offloading the complex query to the database, only a small, relevant subset of data is sent to the client, ensuring the map loads quickly even on slow networks. This avoids the inefficient approach of sending all locations to the client.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div id="modal-sms-alerts" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                <div class="p-6 border-b sticky top-0 bg-white">
+                    <h3 class="text-2xl font-bold text-yellow-700">SMS/WhatsApp Alerts</h3>
+                    <p class="text-gray-600">Reaches users who don't always check the app with critical information.</p>
+                    <button class="modal-close absolute top-4 right-4 text-gray-500 hover:text-gray-800">&times;</button>
+                </div>
+                <div class="p-6">
+                    <h4 class="font-bold text-lg mb-2">Event-Driven Architecture</h4>
+                    <ul class="list-disc list-inside space-y-2 text-gray-700">
+                        <li><strong>CPaaS Provider:</strong> Uses a Communications Platform as a Service (e.g., Twilio, Gupshup, MSG91) to handle message delivery.</li>
+                        <li><strong>Architecture:</strong> The `Notification Service` is event-driven. It listens for events from other services (e.g., `MandiPricesUpdated`, `NewSchemeAvailable`) via a message queue like RabbitMQ.</li>
+                        <li><strong>User Control:</strong> An opt-in UI in the user's profile allows them to choose which alerts they want to receive and on which channel (SMS or WhatsApp).</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div id="modal-grievance-reporting" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                <div class="p-6 border-b sticky top-0 bg-white">
+                    <h3 class="text-2xl font-bold text-yellow-700">Grievance Reporting</h3>
+                    <p class="text-gray-600">Provides a way to report issues and gives a voice to users.</p>
+                    <button class="modal-close absolute top-4 right-4 text-gray-500 hover:text-gray-800">&times;</button>
+                </div>
+                <div class="p-6">
+                    <h4 class="font-bold text-lg mb-2">Transparent Feedback Loop</h4>
+                    <ul class="list-disc list-inside space-y-2 text-gray-700">
+                        <li><strong>Frontend:</strong> A simple form to submit issue type, description, and an optional image.</li>
+                        <li><strong>Backend:</strong> The `Community Service` receives the submission. Images are uploaded to cloud storage (e.g., AWS S3), and the grievance details are stored in a MongoDB collection.</li>
+                        <li><strong>Admin Panel:</strong> A dashboard for admins to view, assign, and update the status of grievances.</li>
+                        <li><strong>User Tracking:</strong> Users can track the status of their submitted grievances from their profile page, ensuring a transparent feedback loop.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('section');
+
+            const activateLink = (id) => {
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${id}`) {
+                        link.classList.add('active');
+                    }
+                });
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        activateLink(entry.target.id);
+                    }
+                });
+            }, { rootMargin: '-50% 0px -50% 0px' });
+
+            sections.forEach(section => observer.observe(section));
+            
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = link.getAttribute('href');
+                    document.querySelector(targetId).scrollIntoView({ behavior: 'smooth' });
+                    if(mobileMenu.classList.contains('hidden') === false){
+                        mobileMenu.classList.add('hidden');
+                    }
+                });
+            });
+
+            const featureCards = document.querySelectorAll('.feature-card');
+            const modals = document.querySelectorAll('.modal');
+            const closeButtons = document.querySelectorAll('.modal-close');
+
+            featureCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const modalId = card.getAttribute('data-modal-target');
+                    const modal = document.getElementById(modalId);
+                    if (modal) {
+                        modal.classList.add('open');
+                        document.body.style.overflow = 'hidden';
+                    }
+                });
+            });
+
+            const closeModal = (modal) => {
+                modal.classList.remove('open');
+                document.body.style.overflow = '';
+            };
+
+            closeButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    closeModal(button.closest('.modal'));
+                });
+            });
+
+            modals.forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        closeModal(modal);
+                    }
+                });
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === "Escape") {
+                    modals.forEach(modal => {
+                        if (modal.classList.contains('open')) {
+                            closeModal(modal);
+                        }
+                    });
+                }
+            });
+
+            const archItems = document.querySelectorAll('#architecture-diagram .arch-item');
+            const archDesc = document.getElementById('arch-desc');
+            archItems.forEach(item => {
+                item.addEventListener('mouseenter', () => {
+                    archDesc.textContent = item.getAttribute('data-desc');
+                });
+                item.addEventListener('mouseleave', () => {
+                    archDesc.textContent = 'Hover over a component to see its description.';
+                });
+            });
+
+            let mandiChart;
+            const commodityFilter = document.getElementById('commodity-filter');
+            const mandiPriceData = {
+                'Wheat': {
+                    labels: ['Ludhiana', 'Moga', 'Jalandhar', 'Patiala', 'Amritsar'],
+                    prices: [2150, 2125, 2140, 2160, 2130]
+                },
+                'Rice': {
+                    labels: ['Tarn Taran', 'Firozpur', 'Gurdaspur', 'Sangrur', 'Barnala'],
+                    prices: [3100, 3050, 3120, 3080, 3090]
+                },
+                'Cotton': {
+                    labels: ['Bathinda', 'Mansa', 'Fazilka', 'Muktsar', 'Abohar'],
+                    prices: [6800, 6950, 6870, 7010, 6900]
+                }
+            };
+            
+            const renderMandiChart = (commodity) => {
+                const ctx = document.getElementById('mandiPriceChart').getContext('2d');
+                const data = mandiPriceData[commodity];
+
+                if (mandiChart) {
+                    mandiChart.destroy();
+                }
+
+                mandiChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            label: `Modal Price (₹/Quintal) for ${commodity}`,
+                            data: data.prices,
+                            backgroundColor: 'rgba(34, 197, 94, 0.6)',
+                            borderColor: 'rgba(22, 163, 74, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                ticks: {
+                                    callback: function(value, index, values) {
+                                        return '₹' + value;
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.y !== null) {
+                                            label += new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(context.parsed.y);
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            };
+            
+            document.querySelector('[data-modal-target="modal-mandi-viewer"]').addEventListener('click', () => {
+                 setTimeout(() => {
+                    if (document.getElementById('mandiPriceChart')) {
+                        renderMandiChart(commodityFilter.value)
+                    }
+                 }, 100);
+            });
+            
+            commodityFilter.addEventListener('change', (e) => {
+                renderMandiChart(e.target.value);
+            });
+        });
+    </script>
+</body>
+</html>
